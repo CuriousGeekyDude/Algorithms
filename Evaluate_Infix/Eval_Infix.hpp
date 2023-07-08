@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include <list>
 
 class Eval_Infix
 {
@@ -14,7 +15,10 @@ class Eval_Infix
 
 
         void reset_field_members();
-        void get_postfix_form();
+        void get_postfix_form();    //Only used for debugging purposes
+        
+        void cancel_out_minus();
+        
         int eval_result;
 
 
@@ -22,7 +26,7 @@ class Eval_Infix
 
         std::string infix_form;
         std::vector<char> operators;
-        std::vector<char> postfix_form;
+        std::list<char> postfix_form;
         std::vector<int> eval_postfix_form;
 
 };
