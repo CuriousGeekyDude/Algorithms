@@ -44,7 +44,7 @@ std::vector<int>::const_iterator last_element(const std::vector<int>::const_iter
     return (--iter);
 }
 
-int pop_last_element(std::vector<int>& eval_postfix_form)
+int pop_last_element(std::vector<int>& eval_postfix_form)   //One bug found here for case -(-5)
 {
     auto const_iter = eval_postfix_form.cend();
     auto iterator = last_element(&const_iter);
@@ -81,9 +81,17 @@ void Eval_Infix::evaluate_postfix()
         }
         
         if(*iter == '+' || *iter == '-' || *iter == '/' || *iter == '*') {
-            if(eval_postfix_form.size() < 2) {
-                throw "eval_postfix_form has insufficient number of operands!\nAborting";
+            if(*iter != '-') {
+                if(eval_postfix_form.size() < 2) {
+                    throw "eval_postfix_form has insufficient number of operands!\nAborting";
+                }
             }
+
+            if(*iter == '-' && eval_postfix_form.size() == 1) {
+                eval_postfix_form[0] = -eval_postfix_form[0];
+                break;
+            }
+
 
             int dummy_int1 = 0;
             int dummy_int2 = 0;
@@ -97,7 +105,7 @@ void Eval_Infix::evaluate_postfix()
                 case '-':
                     dummy_int1 = pop_last_element(eval_postfix_form);
                     dummy_int2 = pop_last_element(eval_postfix_form);
-                    eval_postfix_form.push_back(dummy_int1 - dummy_int2);
+                    eval_postfix_form.push_back(dummy_int2 - dummy_int1);
                     break;
                 case '*':
                     dummy_int1 = pop_last_element(eval_postfix_form);
@@ -107,7 +115,7 @@ void Eval_Infix::evaluate_postfix()
                 case '/':
                     dummy_int1 = pop_last_element(eval_postfix_form);
                     dummy_int2 = pop_last_element(eval_postfix_form);
-                    eval_postfix_form.push_back(dummy_int1 / dummy_int2);
+                    eval_postfix_form.push_back(dummy_int2 / dummy_int1);
                     break;
 
             }
@@ -139,4 +147,32 @@ void Eval_Infix::get_postfix_form()
         std::cout << element;
     }
     std::cout << std::endl;
+}
+
+
+void Eval_Infix::cancel_out_minuses()
+{
+    if(postfix_form.size() == 0) {
+        return;
+    }
+
+    auto iter = postfix_form.begin();
+    if(*iter < 48 || 57 < *iter) {
+        throw "postfixe_form is filled in the wrong way!\nAborting...";
+    }
+
+    ++iter;
+    for(; iter != postfix_form.end(); ++iter) {
+        auto iter_dummy = iter;
+        if(++iter_dummy != postfix_form.end()) {
+            if(*iter == '-' && *iter == *iter_dummy) {
+                ++iter_dummy;
+                iter = postfix_form.erase(iter, iter_dummy);
+                
+                if(postfix_form.size() >= 2) {
+                    iter = postfix_form.insert(iter, '+');
+                }
+            }
+        }
+    }
 }
